@@ -10,7 +10,7 @@ Kit de preparación y esqueleto de agente (Strands + Bedrock) para el hackathon 
 | `requirements.txt` | strands-agents, strands-agents-tools, boto3, requests. |
 | `GUIA-HACKATHON.md` | Guía larga: modelos de Bedrock (Ray2, Stability, Pegasus), ComfyUI, Transcribe/Translate/Polly, patrones multiagente, pitch. |
 | `LEEME-ORDENADOR-TRABAJO.md` | Pasos de instalación en un portátil nuevo. |
-| `chuleta.html` | Chuleta consultable desde el móvil (publicada como artifact en claude.ai). |
+| (chuleta) | Guía móvil privada en claude.ai, con datos de la cuenta; no se sube al repo. |
 
 ## Arranque en 2 minutos (Windows, PowerShell)
 ```powershell
@@ -32,6 +32,6 @@ Linux/Mac: `python3 -m venv .venv && source .venv/bin/activate && pip install -r
 
 ## Cuenta personal de AWS (plan gratuito) — lo aprendido el 31 oct
 - El plan gratuito bloquea Translate, Polly, Transcribe y Rekognition (política SCP). Bedrock y S3 sí funcionan.
-- S3 solo deja crear buckets en la región "casa" de la cuenta: **eu-north-1**. Bucket: `s3://karem-hackathon-278175638522/`.
-- Nova en Europa se llama con el perfil `eu.` (`eu.amazon.nova-pro-v1:0`) en `eu-north-1`. `orquestador.py` elige el prefijo según `AWS_REGION`.
+- S3 solo deja crear buckets en la región "casa" de la cuenta: **eu-north-1**. El bucket de pruebas está ahí (nombre en la chuleta privada).
+- Nova en Europa se llama con el perfil `eu.` (`eu.amazon.nova-pro-v1:0`) en `eu-north-1`. `orquestador.py` elige el prefijo según la región configurada con `aws configure`.
 - En el evento la cuenta será de pago en `us-east-1` con todo habilitado: no hace falta cambiar código, solo la región.

@@ -8,7 +8,7 @@ Ejecutar (necesita credenciales AWS con acceso a Bedrock):
     python hackathon/orquestador.py
 """
 import logging
-import os
+import boto3
 from strands import Agent, tool
 from strands.models.bedrock import BedrockModel
 
@@ -51,7 +51,7 @@ def cortar_clip(s3_uri: str, inicio: str, fin: str) -> str:
 
 # Región y modelo: en el evento será us-east-1 (perfil "us."). En la cuenta personal
 # (plan gratuito) la región casa es eu-north-1 y Nova se usa con el perfil "eu.".
-REGION = os.environ.get("AWS_REGION", "us-east-1")
+REGION = boto3.Session().region_name or "us-east-1"   # la de `aws configure` o AWS_REGION
 PREFIJO = "eu." if REGION.startswith("eu-") else "us."
 model = BedrockModel(model_id=f"{PREFIJO}amazon.nova-pro-v1:0", region_name=REGION)
 
