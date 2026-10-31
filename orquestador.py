@@ -30,7 +30,25 @@ def transcribir_video(s3_uri: str) -> str:
 def traducir_texto(texto: str, idioma_destino: str) -> str:
     """Traduce un texto al idioma destino (código ISO, p. ej. 'en', 'fr').
     Real: Amazon Translate translate_text."""
-    return f"[{idioma_destino}] {texto}"
+    try:
+        bedrock = boto3.client("bedrock-runtime", region_name="eu-north-1")
+        instruccion = (
+            f"Traduce el siguiente texto al idioma cuyo código ISO es '{idioma_destino}' "
+            f"(por ejemplo en = inglés, fr = francés, de = alemán). Responde únicamente "
+            f"con la traducción, sin comillas, sin negritas ni explicaciones. Texto: {texto}."
+        )
+        respuesta = bedrock.converse(
+            modelId="eu.amazon.nova-2-lite-v1:0",
+            messages=[
+                {
+                    "role": "user",
+                    "content": [{"text": instruccion}],
+                }
+            ],
+        )
+        return respuesta["output"]["message"]["content"][0]["text"]
+    except Exception as e:
+        return "[FALLBACK] " + f"[{idioma_destino}] {texto}" + f" - {e}"
 
 @tool
 def generar_locucion(texto: str, idioma: str) -> str:
