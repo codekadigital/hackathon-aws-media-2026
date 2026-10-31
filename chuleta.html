@@ -1,0 +1,511 @@
+<title>Chuleta Hackathon AWS M&E</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a timeline-style field guide. Sticky chip nav, one section visible at a time (hash routed), timecode eyebrows. */
+:root{
+  --bg:#f2f4f6; --surface:#ffffff; --fg:#161d24; --muted:#5b6b78; --line:#d6dde3;
+  --accent:#c96a00; --accent-ink:#ffffff; --teal:#0b6e78; --ok:#1f7a3a; --warn:#b4471b;
+  --code-bg:#1b2229; --code-fg:#e8edf2;
+  --display:"Bricolage Grotesque","IBM Plex Sans",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1319; --surface:#161d25; --fg:#e7ecf1; --muted:#98a7b4; --line:#2a343f;
+  --accent:#f2a33a; --accent-ink:#16100a; --teal:#4fc3cf; --ok:#5ed08a; --warn:#f0905e;
+  --code-bg:#0a0e12; --code-fg:#dfe6ec; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1319; --surface:#161d25; --fg:#e7ecf1; --muted:#98a7b4; --line:#2a343f;
+  --accent:#f2a33a; --accent-ink:#16100a; --teal:#4fc3cf; --ok:#5ed08a; --warn:#f0905e;
+  --code-bg:#0a0e12; --code-fg:#dfe6ec; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:760px;margin:0 auto}
+header.top{padding-block:20px 8px}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,6vw,40px);line-height:1.05;margin:4px 0 6px;text-wrap:balance;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:0;font-size:15px}
+nav.chips{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px;margin-inline:calc(-1*max(16px,env(safe-area-inset-left,0px))) calc(-1*max(16px,env(safe-area-inset-right,0px)));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line)}
+nav.chips ul{list-style:none;margin:0;padding:0;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+nav.chips ul::-webkit-scrollbar{display:none}
+nav.chips a{display:inline-block;white-space:nowrap;padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--fg);text-decoration:none;font-size:14px;font-weight:500}
+nav.chips a[aria-current="page"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+nav.chips a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+section.view{display:none;padding-block:18px 8px}
+section.view.on{display:block}
+.tc{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.06em}
+h2{font-family:var(--display);font-weight:700;font-size:26px;margin:2px 0 14px;line-height:1.1;text-wrap:balance}
+h3{font-family:var(--display);font-weight:700;font-size:18px;margin:26px 0 8px;line-height:1.2}
+p{margin:0 0 12px;max-width:65ch}
+ul.plain,ol.plain{margin:0 0 14px;padding-left:20px;max-width:65ch}
+ul.plain li,ol.plain li{margin-bottom:6px}
+.note{border-left:3px solid var(--accent);padding:8px 12px;background:var(--surface);margin:0 0 14px;max-width:65ch}
+.note.warn{border-left-color:var(--warn)}
+.note.ok{border-left-color:var(--ok)}
+.note p:last-child{margin:0}
+pre{position:relative;background:var(--code-bg);color:var(--code-fg);font-family:var(--mono);font-size:13px;line-height:1.5;padding:12px 14px;border-radius:8px;overflow-x:auto;margin:0 0 14px;min-width:0}
+pre code{font-family:inherit}
+code{font-family:var(--mono);font-size:.92em;background:var(--surface);border:1px solid var(--line);padding:1px 5px;border-radius:4px}
+pre code{background:none;border:0;padding:0}
+button.copy{position:absolute;top:8px;right:8px;font-family:var(--body);font-size:12px;font-weight:600;background:var(--accent);color:var(--accent-ink);border:0;border-radius:6px;padding:4px 9px;cursor:pointer}
+button.copy.done{background:var(--ok);color:#fff}
+.tbl{overflow-x:auto;margin:0 0 16px;min-width:0}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--mono);font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:500}
+td code{white-space:nowrap}
+.agenda{list-style:none;margin:0 0 16px;padding:0;max-width:65ch}
+.agenda li{display:grid;grid-template-columns:62px 1fr;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.agenda .t{font-family:var(--mono);font-size:14px;color:var(--accent);font-variant-numeric:tabular-nums;padding-top:2px}
+.agenda b{display:block;font-weight:600}
+.agenda small{color:var(--muted);font-size:14px}
+.check{list-style:none;margin:0 0 16px;padding:0;max-width:65ch}
+.check li{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line)}
+.check input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--accent);flex:none}
+.check label{cursor:pointer}
+.check li.done label{color:var(--muted);text-decoration:line-through}
+.steps{counter-reset:s;list-style:none;margin:0 0 16px;padding:0;max-width:65ch}
+.steps li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;gap:10px;margin-bottom:10px}
+.steps li::before{content:counter(s);font-family:var(--display);font-weight:700;color:var(--accent);font-size:20px;line-height:1.2}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:0 0 16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;min-width:0}
+.card h4{margin:0 0 6px;font-family:var(--display);font-size:16px}
+.card p{font-size:14px;margin:0}
+.pill{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:4px;border:1px solid var(--line);color:var(--muted);margin-left:6px;vertical-align:middle}
+.pill.teal{color:var(--teal);border-color:var(--teal)}
+.pill.warn{color:var(--warn);border-color:var(--warn)}
+footer{color:var(--muted);font-size:13px;padding-block:24px 0;border-top:1px solid var(--line);margin-top:24px}
+@media (prefers-reduced-motion:no-preference){nav.chips ul{scroll-behavior:smooth}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="kicker">4 nov 2026 · Torre Foster · 09:00–18:30</div>
+  <h1>Chuleta Hackathon AWS M&amp;E</h1>
+  <p class="sub">Lo que no vas a recordar bajo presión: entorno, Kiro, Strands, modelos de Bedrock, ffmpeg y el pitch. Hecha para el móvil.</p>
+</header>
+
+<nav class="chips" aria-label="Secciones"><ul>
+  <li><a href="#dia">El día</a></li>
+  <li><a href="#entorno">Entorno</a></li>
+  <li><a href="#kiro">Kiro</a></li>
+  <li><a href="#agente">Agente</a></li>
+  <li><a href="#aws">Media AWS</a></li>
+  <li><a href="#prompts">Prompts</a></li>
+  <li><a href="#pitch">Pitch</a></li>
+</ul></nav>
+
+<!-- ===================== EL DÍA ===================== -->
+<section class="view" id="dia">
+  <div class="tc">00 · EL DÍA</div>
+  <h2>Qué pasa el 4 de noviembre</h2>
+  <p>AWS Media &amp; Entertainment Agentic AI Partner Hackathon. Torre Foster, Paseo de la Castellana 259A, Madrid. Un día, equipos, una demo y un pitch de 5 minutos ante un panel de AWS.</p>
+
+  <div class="note">
+    <p><b>La finalidad no es escribir buenos prompts.</b> Es entregar una demo que funcione de un agente de IA para medios (localización, highlights, promos, descubrimiento) sobre AWS, y contarla bien. Los prompts son el medio: a Kiro para que escriba el código, al modelo para que elija tools.</p>
+  </div>
+
+  <h3>Agenda y decisiones (nuestro plan)</h3>
+  <ul class="agenda">
+    <li><span class="t">09:00</span><div><b>Llegada y registro</b><small>Portátil con navegador basta. Te dan cuenta AWS temporal y Kiro en el navegador si no lo tienes instalado.</small></div></li>
+    <li><span class="t">09:30</span><div><b>Clonar el repo y probar</b><small><code>git clone</code> del kit, <code>pip install -r requirements.txt</code>, <code>python probar_tools.py</code> → 5 líneas.</small></div></li>
+    <li><span class="t">10:00</span><div><b>Caso de uso decidido. No se cambia.</b><small>Un cliente concreto, un dolor en números, una frase de solución.</small></div></li>
+    <li><span class="t">10:15</span><div><b>Reparto de roles</b><small>1 orquestador · 1-2 tools media (Transcribe/Polly/ffmpeg) · 1 ComfyUI/vídeo · 1 datos + KB · 1 slides y demo.</small></div></li>
+    <li><span class="t">12:30</span><div><b>Punto de recorte</b><small>Si vais tarde, se quita alcance. Lo que no funciona vuelve a placeholder.</small></div></li>
+    <li><span class="t">15:00</span><div><b>Grabar la demo</b><small>En cuanto funcione la primera vez. Nunca demo en vivo.</small></div></li>
+    <li><span class="t">16:30</span><div><b>Slides y ensayo del pitch</b><small>Problema, solución, arquitectura, demo grabada, valor.</small></div></li>
+    <li><span class="t">17:00</span><div><b>Presentaciones</b><small>5 minutos. Quién hizo qué en una línea.</small></div></li>
+    <li><span class="t">18:00</span><div><b>git push antes de irte</b><small>La cuenta AWS del evento se borra. Lo que no esté en GitHub se pierde.</small></div></li>
+  </ul>
+
+  <h3>Checklist (se guarda en este móvil)</h3>
+  <ul class="check" id="checklist">
+    <li><input type="checkbox" id="c1"><label for="c1">Confirmado con Ángel (coordinador) si puedo llevar el portátil personal con Kiro.</label></li>
+    <li><input type="checkbox" id="c2"><label for="c2">Sé mi contraseña de AWS Builder ID y de GitHub (sin el gestor del portátil del trabajo).</label></li>
+    <li><input type="checkbox" id="c3"><label for="c3">Repo en GitHub accesible desde cualquier navegador.</label></li>
+    <li><input type="checkbox" id="c4"><label for="c4">Equipo y caso de uso hablados antes del día 4.</label></li>
+    <li><input type="checkbox" id="c5"><label for="c5">Leídas las secciones 1 y 3 de la guía (modelos y servicios de media).</label></li>
+    <li><input type="checkbox" id="c6"><label for="c6">Tutorial ComfyUI de 30 min visto.</label></li>
+    <li><input type="checkbox" id="c7"><label for="c7">Cargador, auriculares, agua. Documento de identidad para el registro en la torre.</label></li>
+    <li><input type="checkbox" id="c8"><label for="c8">Al salir: código subido a GitHub y vídeo de la demo descargado.</label></li>
+  </ul>
+
+  <h3>Equipo Capgemini en el chat</h3>
+  <p>Silvia Piñel, Sergio Rodil, Azahara Clavero, José Joaquín Losas, Diego Luis Méndez, Jose Manuel Mejías (Valencia), Meritxell Almenara. Coordina Ángel Esteban Santana. Formación interna: Nines.</p>
+</section>
+
+<!-- ===================== ENTORNO ===================== -->
+<section class="view" id="entorno">
+  <div class="tc">01 · ENTORNO</div>
+  <h2>Montar el entorno en un portátil nuevo</h2>
+  <p>Todo lo que ya falló una vez y cómo se arregló. Windows con PowerShell.</p>
+
+  <h3>Python y el proyecto</h3>
+<pre><code>py install 3.12
+py -V:3.12 -m venv .venv --clear
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+.venv\Scripts\activate
+pip install -r requirements.txt
+python probar_tools.py</code></pre>
+  <p>Resultado correcto: cinco líneas de texto con rutas <code>s3://demo-bucket/...</code>. Sin modelo ni credenciales.</p>
+
+  <h3>Errores que ya hemos visto</h3>
+  <div class="tbl"><table>
+    <tr><th>Síntoma</th><th>Causa</th><th>Arreglo</th></tr>
+    <tr><td><code>py</code> no se reconoce</td><td>No hay Python install manager</td><td>Escribe <code>python</code>: la Store instala el gestor. Luego <code>py install 3.12</code>.</td></tr>
+    <tr><td><code>python</code> no se reconoce</td><td>Al revés: solo hay <code>py</code></td><td>Usa <code>py -m venv .venv</code> y <code>py probar_tools.py</code>.</td></tr>
+    <tr><td>Error compilando <code>pyyaml</code> (MSVC)</td><td>Python 3.15 demasiado nuevo</td><td><code>deactivate</code>, <code>py install 3.12</code>, recrea el venv con <code>--clear</code>.</td></tr>
+    <tr><td>activate bloqueado por ExecutionPolicy</td><td>PowerShell por defecto</td><td><code>Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code></td></tr>
+    <tr><td>Carpeta con X roja</td><td>OneDrive sin sincronizar</td><td>Ignóralo o trabaja en <code>C:\Users\&lt;tú&gt;\hackathon</code> fuera de OneDrive.</td></tr>
+    <tr><td>Kiro "Restricted Mode"</td><td>Carpeta no confiada</td><td>Banner → Manage → Trust.</td></tr>
+    <tr><td>No puedo descargar instaladores (Zscaler)</td><td>Portátil Capgemini</td><td>No insistas. Kiro en el navegador dentro de la cuenta AWS del evento.</td></tr>
+  </table></div>
+
+  <h3>Linux / Mac / estación del evento</h3>
+<pre><code>python3 -m venv .venv &amp;&amp; source .venv/bin/activate
+pip install -r requirements.txt
+python probar_tools.py</code></pre>
+
+  <h3>Credenciales AWS el día 4</h3>
+  <p>Te darán claves temporales en el portal del evento. Pégalas como variables de entorno en la terminal donde corras el agente:</p>
+<pre><code>$env:AWS_ACCESS_KEY_ID="..."
+$env:AWS_SECRET_ACCESS_KEY="..."
+$env:AWS_SESSION_TOKEN="..."
+$env:AWS_DEFAULT_REGION="us-east-1"</code></pre>
+  <p>En bash: <code>export AWS_ACCESS_KEY_ID=...</code>. Comprueba con <code>aws sts get-caller-identity</code> si hay CLI.</p>
+
+  <h3>Guardar el código al final</h3>
+<pre><code>git add -A
+git commit -m "Demo hackathon"
+git push</code></pre>
+  <p>Si no hay git en el navegador de Kiro: descarga la carpeta como zip desde el explorador de archivos y súbela luego al repo.</p>
+</section>
+
+<!-- ===================== KIRO ===================== -->
+<section class="view" id="kiro">
+  <div class="tc">02 · KIRO</div>
+  <h2>Kiro en 10 líneas</h2>
+  <div class="grid2">
+    <div class="card"><h4>Entrar</h4><p>Sign in con AWS Builder ID (vale el correo del trabajo). Al abrir carpeta: Trust.</p></div>
+    <div class="card"><h4>Atajos</h4><p>Chat <code>Ctrl+Shift+L</code> · Terminal <code>Ctrl+ñ</code> · Paleta <code>Ctrl+Shift+P</code>.</p></div>
+    <div class="card"><h4>Créditos</h4><p>Plan gratuito: 50 al mes, se renuevan el día 1. Un "explica este archivo" ≈ 0,2. El evento da un código extra.</p></div>
+    <div class="card"><h4>Diffs</h4><p>Kiro propone, tú aceptas. "1 of N pending": revisa cada archivo, Accept o Reject.</p></div>
+  </div>
+
+  <h3>Cómo pedirle las cosas</h3>
+  <p>Un prompt bueno dice <b>qué</b>, <b>dónde</b>, <b>cómo se llama</b> y <b>qué no tocar</b>. Compara:</p>
+  <div class="note warn"><p>"Mejora el orquestador para que corte vídeos."</p></div>
+  <div class="note ok"><p>"Añade a <code>orquestador.py</code> una tool <code>cortar_clip(s3_uri, inicio, fin)</code> que de momento devuelva una ruta falsa de S3, con docstring en español que diga que la versión real usará ffmpeg. Inclúyela en la lista de tools del Agent, menciónala en el system_prompt y añade su llamada a <code>probar_tools.py</code>. No cambies nada más."</p></div>
+
+  <h3>Qué revisar en un diff (10 segundos)</h3>
+  <ol class="steps">
+    <li><div><b>Verde = lo que pediste.</b> Nueva función con los parámetros y nombre que dijiste.</div></li>
+    <li><div><b>Nada rojo que no pidieras.</b> No borra tools, no cambia modelo ni región, no reescribe el prompt entero.</div></li>
+    <li><div><b>Piezas conectadas.</b> La tool existe, está en <code>tools=[...]</code> y el system_prompt la menciona. Si falta una, el agente nunca la usará.</div></li>
+  </ol>
+  <p>Rechaza si toca un archivo que no nombraste. Después de aceptar: <code>python probar_tools.py</code>.</p>
+
+  <h3>Si Kiro se queda en "Working..."</h3>
+  <p>Espera un minuto. Si no, Cancel y vuelve a enviar el mismo prompt. No gasta créditos hasta que responde.</p>
+</section>
+
+<!-- ===================== AGENTE ===================== -->
+<section class="view" id="agente">
+  <div class="tc">03 · AGENTE STRANDS</div>
+  <h2>El esqueleto que ya tenemos</h2>
+  <p>Un orquestador con tools falsas. El día 4 se sustituyen por las reales de una en una. Si una real falla, vuelve a la falsa: la demo no se para.</p>
+
+<pre><code>from strands import Agent, tool
+from strands.models.bedrock import BedrockModel
+
+@tool
+def transcribir_video(s3_uri: str) -> str:
+    """Transcribe el audio de un vídeo en S3 con timestamps.
+    Real: Amazon Transcribe."""
+    return "[00:00-00:05] Bienvenidos al partido de hoy."
+
+model = BedrockModel(model_id="us.amazon.nova-pro-v1:0",
+                     region_name="us-east-1")
+orquestador = Agent(
+    model=model,
+    system_prompt="Eres el agente de localización. "
+                  "Orden: transcribir_video, traducir_texto, generar_locucion.",
+    tools=[transcribir_video, traducir_texto, generar_locucion],
+)
+orquestador("Localiza s3://demo-bucket/partido.mp4 al inglés")</code></pre>
+
+  <h3>Reglas que evitan horas perdidas</h3>
+  <ul class="plain">
+    <li>El <b>docstring</b> es lo que lee el modelo para elegir la tool. Escríbelo claro: qué hace, qué recibe, qué devuelve.</li>
+    <li>Prueba cada tool como función normal antes de dejar que el agente la elija: <code>transcribir_video("s3://...")</code>.</li>
+    <li>Activa el log para la demo: <code>logging.getLogger("strands").setLevel(logging.INFO)</code>. Se ve qué tool elige y por qué.</li>
+    <li>Nova Pro y Pegasus en <code>us-east-1</code>. Ray2 y Stability en <code>us-west-2</code>. Dos clientes boto3.</li>
+  </ul>
+
+  <h3>Sustituir una tool falsa por la real</h3>
+<pre><code>import boto3
+@tool
+def traducir_texto(texto: str, idioma_destino: str) -> str:
+    """Traduce texto al idioma destino (código ISO: en, fr, de)."""
+    tl = boto3.client("translate", region_name="us-east-1")
+    return tl.translate_text(Text=texto, SourceLanguageCode="auto",
+                             TargetLanguageCode=idioma_destino)["TranslatedText"]</code></pre>
+
+  <h3>Agentes como tools (orquestador + especialistas)</h3>
+<pre><code>@tool
+def buscar_catalogo(query: str) -> str:
+    """Busca títulos en el catálogo a partir de una descripción."""
+    kb = Agent(model=model, system_prompt="Eres el buscador del catálogo.",
+               tools=[retrieve], callback_handler=None)
+    return str(kb(query))
+
+jefe = Agent(model=model, tools=[perfil_audiencia, buscar_catalogo, promo])</code></pre>
+
+  <h3>Swarm (si queréis enseñar colaboración)</h3>
+<pre><code>from strands.multiagent import Swarm
+swarm = Swarm([investigador, redactor, revisor], entry_point=investigador,
+              max_handoffs=10, max_iterations=15)
+r = swarm("Brief de promo para la final, público 18-25")</code></pre>
+  <p>Siempre <code>max_handoffs</code>. Sin límite se pasan la pelota para siempre.</p>
+</section>
+
+<!-- ===================== AWS ===================== -->
+<section class="view" id="aws">
+  <div class="tc">04 · MEDIA EN AWS</div>
+  <h2>Qué servicio hace cada paso</h2>
+
+  <h3>Modelos de Bedrock (verificado oct 2026)</h3>
+  <div class="tbl"><table>
+    <tr><th>Para</th><th>Modelo</th><th>modelId</th><th>Región</th></tr>
+    <tr><td>Orquestar / razonar</td><td>Nova Pro</td><td><code>us.amazon.nova-pro-v1:0</code></td><td>us-east-1</td></tr>
+    <tr><td>Describir clip corto, captions</td><td>Nova 2 Lite</td><td><code>us.amazon.nova-2-lite-v1:0</code></td><td>us-east-1</td></tr>
+    <tr><td>Entender vídeo largo, timestamps</td><td>TwelveLabs Pegasus 1.5</td><td><code>us.twelvelabs.pegasus-1-5-v1:0</code></td><td>us-east-1</td></tr>
+    <tr><td>Texto → imagen</td><td>Stable Image Core</td><td><code>stability.stable-image-core-v1:1</code></td><td>us-west-2</td></tr>
+    <tr><td>Texto → vídeo 5-9 s</td><td>Luma Ray2</td><td><code>luma.ray-v2:0</code></td><td>us-west-2</td></tr>
+    <tr><td>Voz conversacional</td><td>Nova 2 Sonic</td><td><code>amazon.nova-2-sonic-v1:0</code></td><td>us-east-1</td></tr>
+    <tr><td colspan="4"><span class="pill warn">No usar</span> Nova Reel y Nova Canvas: fin de vida 30/9/2026. Si ves ejemplos con ellos, cámbialos a Ray2 / Stability.</td></tr>
+  </table></div>
+
+  <h3>Imagen con Stability</h3>
+<pre><code>import boto3, json, base64
+br = boto3.client("bedrock-runtime", region_name="us-west-2")
+r = br.invoke_model(modelId="stability.stable-image-core-v1:1",
+    body=json.dumps({"prompt": "key visual serie sci-fi, neón, 16:9",
+                     "aspect_ratio": "16:9", "output_format": "png"}))
+img = json.loads(r["body"].read())["images"][0]
+open("keyvisual.png", "wb").write(base64.b64decode(img))</code></pre>
+
+  <h3>Momentos de un vídeo con Pegasus</h3>
+<pre><code>br = boto3.client("bedrock-runtime", region_name="us-east-1")
+r = br.invoke_model(modelId="us.twelvelabs.pegasus-1-5-v1:0", body=json.dumps({
+  "inputPrompt": "Lista los 5 momentos más emocionantes con inicio-fin y título. JSON.",
+  "mediaSource": {"s3Location": {"uri": "s3://BUCKET/partido.mp4",
+                                 "bucketOwner": "123456789012"}},
+  "maxOutputTokens": 2048}))
+print(json.loads(r["body"].read()))</code></pre>
+  <p>El bucket debe estar en la misma región que el cliente.</p>
+
+  <h3>Vídeo con Ray2 (asíncrono, 1-3 min)</h3>
+<pre><code>br = boto3.client("bedrock-runtime", region_name="us-west-2")
+job = br.start_async_invoke(modelId="luma.ray-v2:0",
+    modelInput={"prompt": "Anuncio 5 s, zapatillas por Madrid al amanecer",
+                "duration": "5s", "resolution": "720p", "aspect_ratio": "9:16"},
+    outputDataConfig={"s3OutputDataConfig": {"s3Uri": "s3://BUCKET/ray2/"}})
+arn = job["invocationArn"]
+while br.get_async_invoke(invocationArn=arn)["status"] == "InProgress":
+    time.sleep(15)</code></pre>
+
+  <h3>Transcribe → Translate → Polly</h3>
+<pre><code>tr = boto3.client("transcribe", region_name="us-east-1")
+tr.start_transcription_job(TranscriptionJobName="job1",
+    Media={"MediaFileUri": "s3://BUCKET/video.mp4"},
+    IdentifyLanguage=True, Subtitles={"Formats": ["vtt"]})
+# esperar a COMPLETED, leer Transcript.TranscriptFileUri
+
+tl = boto3.client("translate", region_name="us-east-1")
+en = tl.translate_text(Text=texto, SourceLanguageCode="auto",
+                       TargetLanguageCode="en")["TranslatedText"]
+
+polly = boto3.client("polly", region_name="us-east-1")
+a = polly.synthesize_speech(Text=en, VoiceId="Matthew",
+                            Engine="generative", OutputFormat="mp3")
+open("dub_en.mp3", "wb").write(a["AudioStream"].read())</code></pre>
+
+  <h3>ffmpeg (en la estación)</h3>
+<pre><code># cortar un tramo
+ffmpeg -ss 00:12:03 -to 00:12:18 -i partido.mp4 -c copy clip1.mp4
+
+# vertical 9:16 para redes + música
+ffmpeg -ss 00:12:03 -to 00:12:18 -i partido.mp4 -i musica.mp3 \
+  -vf "crop=ih*9/16:ih,scale=1080:1920" -map 0:v -map 1:a -shortest clip1.mp4
+
+# sustituir la voz por el doblaje
+ffmpeg -i video.mp4 -i dub_en.mp3 -map 0:v -map 1:a -c:v copy -shortest video_en.mp4
+
+# quemar subtítulos
+ffmpeg -i video_en.mp4 -vf subtitles=subs.vtt video_en_subs.mp4</code></pre>
+
+  <h3>ComfyUI (estación con GPU)</h3>
+  <ol class="steps">
+    <li><div>Templates → Wan 2.2 text-to-video o image-to-video.</div></li>
+    <li><div>Tocas 3 nodos: prompt positivo, negativo, parámetros (tamaño, frames, steps, seed).</div></li>
+    <li><div>Queue. La salida va a <code>output/</code>. Si falta memoria: menos resolución o frames.</div></li>
+    <li><div>Workflow → Export (API format). Ese JSON se envía por HTTP desde una tool.</div></li>
+  </ol>
+<pre><code>import requests, time
+COMFY = "http://localhost:8188"
+def run_comfy(wf: dict) -> str:
+    pid = requests.post(f"{COMFY}/prompt", json={"prompt": wf}).json()["prompt_id"]
+    while True:
+        h = requests.get(f"{COMFY}/history/{pid}").json()
+        if pid in h: return str(h[pid]["outputs"])
+        time.sleep(5)</code></pre>
+
+  <h3>Pipeline por caso de uso</h3>
+  <div class="tbl"><table>
+    <tr><th>Caso</th><th>Entender</th><th>Generar</th><th>Agentes</th></tr>
+    <tr><td>1 Vídeo publicitario</td><td>Nova 2 Lite lee el brief</td><td>Ray2 / Wan 2.2, Stability, Polly</td><td>1 orquestador + tool por medio</td></tr>
+    <tr><td>2 Highlights y promos</td><td>Pegasus 1.5</td><td>ffmpeg 9:16 + Nova caption</td><td>orquestador + cortar + caption</td></tr>
+    <tr><td>3 Localización y doblaje</td><td>Transcribe</td><td>Translate + Polly + ffmpeg</td><td>pipeline lineal</td></tr>
+    <tr><td>4 Descubrimiento conversacional</td><td>Converse / Nova Sonic</td><td>Stability carátulas</td><td>agents as tools + KB</td></tr>
+  </table></div>
+</section>
+
+<!-- ===================== PROMPTS ===================== -->
+<section class="view" id="prompts">
+  <div class="tc">05 · PROMPTS PARA KIRO</div>
+  <h2>Listos para copiar</h2>
+  <p>Cambia lo que va entre corchetes. Cada uno pide una cosa y dice qué no tocar.</p>
+
+  <h3>Arrancar el proyecto</h3>
+<pre><code>Crea orquestador.py con Strands Agents: un Agent con BedrockModel
+(model_id "us.amazon.nova-pro-v1:0", region us-east-1) y 3 tools
+placeholder decoradas con @tool que devuelvan texto fijo:
+[transcribir_video(s3_uri)], [traducir_texto(texto, idioma)],
+[generar_locucion(texto, idioma)]. Docstrings en español diciendo
+qué servicio real usará cada una. System prompt que indique el orden.
+Crea también probar_tools.py que llame a cada tool directamente.</code></pre>
+
+  <h3>Añadir una tool</h3>
+<pre><code>Añade a orquestador.py una tool [nombre(parametros)] que de momento
+devuelva [valor falso], con docstring en español que diga que la
+versión real usará [servicio]. Inclúyela en la lista de tools del
+Agent, menciónala en el system_prompt y añade su llamada a
+probar_tools.py. No cambies nada más.</code></pre>
+
+  <h3>Hacer real una tool</h3>
+<pre><code>Sustituye el cuerpo de [traducir_texto] en orquestador.py por una
+llamada real a [Amazon Translate con boto3, translate_text,
+SourceLanguageCode "auto"] en region us-east-1. Mantén la firma y el
+docstring. Si la llamada falla, captura la excepción y devuelve el
+valor placeholder anterior con el prefijo "[FALLBACK]". No toques
+las demás tools.</code></pre>
+
+  <h3>Tool que llama a ComfyUI</h3>
+<pre><code>Crea en comfy_tool.py una tool @tool generar_video_comfy(prompt: str)
+que cargue el JSON [workflow_api.json], sustituya el texto del nodo
+["6"]["inputs"]["text"] por el prompt, lo envíe a POST
+http://localhost:8188/prompt y espere en /history/{id} hasta que
+termine. Devuelve el nombre del archivo generado. Usa requests.</code></pre>
+
+  <h3>Depurar</h3>
+<pre><code>Al ejecutar python orquestador.py sale este error: [pegar error].
+Explica la causa en dos frases y propón el cambio mínimo. No
+refactorices nada más.</code></pre>
+
+  <h3>Para la presentación</h3>
+<pre><code>Genera README.md con: problema que resuelve, arquitectura en un
+diagrama mermaid (Usuario → Agente orquestador Strands → tools →
+servicios AWS → S3), cómo ejecutarlo y siguientes pasos a producción
+(AgentCore Runtime, Guardrails). En español, máximo 60 líneas.</code></pre>
+</section>
+
+<!-- ===================== PITCH ===================== -->
+<section class="view" id="pitch">
+  <div class="tc">06 · PITCH</div>
+  <h2>Cinco minutos ante el panel</h2>
+  <ul class="agenda">
+    <li><span class="t">0:00</span><div><b>Problema (30 s)</b><small>Un cliente de medios concreto y su dolor en números. "Localizar un episodio a 5 idiomas tarda 3 días y cuesta X."</small></div></li>
+    <li><span class="t">0:30</span><div><b>Solución (30 s)</b><small>Una frase. "Un agente que lo hace en 20 minutos y deja todo en S3."</small></div></li>
+    <li><span class="t">1:00</span><div><b>Arquitectura (1 min)</b><small>Cajas: Usuario → Kiro/UI → Agente orquestador (Strands) → tools (Transcribe, Translate, Polly, Pegasus, Ray2/ComfyUI, KB) → S3. Marca qué es gestionado por AWS.</small></div></li>
+    <li><span class="t">2:00</span><div><b>Demo grabada (2 min)</b><small>Enseña el log del agente eligiendo tools y el bucket con los resultados. "¿Esto es real?" se responde con el bucket.</small></div></li>
+    <li><span class="t">4:00</span><div><b>Valor y siguiente paso (30 s)</b><small>Ahorro o ingreso nuevo. A producción con AgentCore Runtime, Guardrails, coste por minuto de vídeo.</small></div></li>
+    <li><span class="t">4:30</span><div><b>Equipo (15 s)</b><small>Quién hizo qué, una línea.</small></div></li>
+  </ul>
+
+  <h3>Plan B</h3>
+  <ul class="plain">
+    <li>Sin GPU o ComfyUI caído: Ray2 en Bedrock, o imagen Stability + locución Polly. Sigue contando una historia.</li>
+    <li>Tool real que falla a las 16:00: vuelve al placeholder y la demo grabada ya la tenías.</li>
+    <li>Sin credenciales: el agente funciona con tools falsas y enseñas el código real preparado.</li>
+  </ul>
+
+  <h3>Lo que valora el jurado</h3>
+  <ul class="plain">
+    <li>Que la demo funcione de verdad, aunque sea pequeña.</li>
+    <li>Uso con sentido de servicios AWS: cada paso con el servicio que toca.</li>
+    <li>Que el agente decida (se ve en el log), no un script con if.</li>
+    <li>Un camino creíble a producción.</li>
+  </ul>
+</section>
+
+<footer>Fuente: GUIA-HACKATHON.md y las sesiones de preparación del 24 al 31 de octubre de 2026. Modelos verificados contra la documentación de Bedrock en octubre de 2026.</footer>
+</div>
+
+<script>
+(function(){
+  var views = Array.prototype.slice.call(document.querySelectorAll('section.view'));
+  var links = Array.prototype.slice.call(document.querySelectorAll('nav.chips a'));
+  var ids = views.map(function(v){return v.id;});
+  function show(){
+    var h = (location.hash||'').replace('#','');
+    if (ids.indexOf(h) < 0) h = 'dia';
+    views.forEach(function(v){ v.classList.toggle('on', v.id === h); });
+    links.forEach(function(a){
+      var on = a.getAttribute('href') === '#'+h;
+      if (on) { a.setAttribute('aria-current','page'); try{ a.scrollIntoView({block:'nearest', inline:'center'}); }catch(e){} }
+      else a.removeAttribute('aria-current');
+    });
+    window.scrollTo(0,0);
+  }
+  window.addEventListener('hashchange', show);
+  show();
+
+  // copy buttons
+  document.querySelectorAll('pre').forEach(function(pre){
+    var b = document.createElement('button');
+    b.className = 'copy'; b.type = 'button'; b.textContent = 'Copiar';
+    b.addEventListener('click', function(){
+      var txt = pre.querySelector('code').textContent;
+      function ok(){ b.textContent = 'Copiado'; b.classList.add('done'); setTimeout(function(){ b.textContent='Copiar'; b.classList.remove('done'); }, 1500); }
+      function fallback(){
+        var r = document.createRange(); r.selectNodeContents(pre.querySelector('code'));
+        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        b.textContent = 'Selecciona y copia';
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(ok, fallback);
+      } else fallback();
+    });
+    pre.appendChild(b);
+  });
+
+  // checklist persisted per device
+  var KEY = 'chuleta-hackathon-checks';
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch(e) { saved = {}; }
+  document.querySelectorAll('#checklist input').forEach(function(cb){
+    cb.checked = !!saved[cb.id];
+    cb.parentNode.classList.toggle('done', cb.checked);
+    cb.addEventListener('change', function(){
+      cb.parentNode.classList.toggle('done', cb.checked);
+      saved[cb.id] = cb.checked;
+      try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch(e) {}
+    });
+  });
+})();
+</script>
