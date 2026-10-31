@@ -7,7 +7,10 @@ Ejecutar (necesita credenciales AWS con acceso a Bedrock):
     source .venv/bin/activate
     python hackathon/orquestador.py
 """
+import base64
+import json
 import logging
+import time
 import boto3
 from strands import Agent, tool
 from strands.models.bedrock import BedrockModel
@@ -38,8 +41,35 @@ def generar_locucion(texto: str, idioma: str) -> str:
 @tool
 def generar_imagen(prompt: str) -> str:
     """Genera una imagen (key visual) a partir de un prompt y devuelve su ruta.
+    El prompt debe escribirse en inglés: el filtro de Stability rechaza prompts en otros idiomas.
     Real: Bedrock invoke_model con stability.stable-image-core-v1:1 (us-west-2)."""
-    return "s3://demo-bucket/keyvisual.png"
+    try:
+        # 1) Generar imagen con Bedrock (Stability, us-west-2)
+        bedrock = boto3.client("bedrock-runtime", region_name="us-west-2")
+        cuerpo = json.dumps(
+            {"prompt": prompt, "aspect_ratio": "16:9", "output_format": "png"}
+        )
+        respuesta = bedrock.invoke_model(
+            modelId="stability.stable-image-core-v1:1",
+            body=cuerpo,
+        )
+        resultado = json.loads(respuesta["body"].read())
+        if "images" not in resultado or not resultado["images"]:
+            return f"[FALLBACK] s3://demo-bucket/keyvisual.png - {resultado.get('finish_reasons')}"
+        imagen_b64 = resultado["images"][0]
+        imagen_bytes = base64.b64decode(imagen_b64)
+
+        # 2) Subir a S3 (eu-north-1)
+        s3 = boto3.client("s3", region_name="eu-north-1")
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        bucket = "karem-hackathon-278175638522"
+        key = f"generadas/keyvisual_{timestamp}.png"
+        s3.put_object(
+            Bucket=bucket, Key=key, Body=imagen_bytes, ContentType="image/png"
+        )
+        return f"s3://{bucket}/{key}"
+    except Exception as e:
+        return f"[FALLBACK] s3://demo-bucket/keyvisual.png - {e}"
 
 @tool
 def cortar_clip(s3_uri: str, inicio: str, fin: str) -> str:
@@ -60,7 +90,7 @@ orquestador = Agent(
     system_prompt=(
         "Eres el agente de localización de contenidos de una plataforma de streaming. "
         "Para localizar un vídeo: 1) transcribir_video, 2) traducir_texto al idioma pedido, "
-        "3) generar_locucion con la traducción. Si te piden material promocional, usa generar_imagen. "
+        "3) generar_locucion con la traducción. Si te piden material promocional, usa generar_imagen (el prompt debe ir en inglés, porque el filtro de Stability rechaza prompts en otros idiomas). "
         "Si necesitas un fragmento concreto del vídeo, usa cortar_clip indicando los instantes de inicio y fin. "
         "Explica brevemente cada paso y devuelve las rutas de los archivos generados."
     ),

@@ -5,5 +5,5 @@ from orquestador import transcribir_video, traducir_texto, generar_locucion, gen
 print(transcribir_video("s3://demo-bucket/partido.mp4"))
 print(traducir_texto("Gol en el minuto tres", "en"))
 print(generar_locucion("Goal in minute three", "en"))
-print(generar_imagen("key visual partido de fútbol, estilo cinematográfico"))
+print(generar_imagen("cinematic key visual of a football match at night, stadium lights"))
 print(cortar_clip("s3://demo-bucket/partido.mp4", "00:00:03", "00:00:10"))
