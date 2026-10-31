@@ -29,3 +29,9 @@ Linux/Mac: `python3 -m venv .venv && source .venv/bin/activate && pip install -r
 3. Sustituir tools falsas por reales de una en una; si una falla, volver al placeholder.
 4. Grabar la demo en cuanto funcione la primera vez.
 5. **Antes de irse: `git push`.** La cuenta AWS del evento se borra al terminar.
+
+## Cuenta personal de AWS (plan gratuito) — lo aprendido el 31 oct
+- El plan gratuito bloquea Translate, Polly, Transcribe y Rekognition (política SCP). Bedrock y S3 sí funcionan.
+- S3 solo deja crear buckets en la región "casa" de la cuenta: **eu-north-1**. Bucket: `s3://karem-hackathon-278175638522/`.
+- Nova en Europa se llama con el perfil `eu.` (`eu.amazon.nova-pro-v1:0`) en `eu-north-1`. `orquestador.py` elige el prefijo según `AWS_REGION`.
+- En el evento la cuenta será de pago en `us-east-1` con todo habilitado: no hace falta cambiar código, solo la región.
