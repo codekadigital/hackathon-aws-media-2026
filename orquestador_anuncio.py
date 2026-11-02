@@ -10,6 +10,7 @@ Ejecutar (necesita credenciales AWS con acceso a Bedrock + ffmpeg instalado):
     source .venv/bin/activate
     python hackathon/orquestador_anuncio.py
 """
+import base64
 import json
 import logging
 import os
@@ -18,10 +19,11 @@ import tempfile
 import time
 import boto3
 from urllib.parse import urlparse
+from botocore.exceptions import ClientError
 from strands import Agent, tool
 
-# Se reutilizan tools y modelo del orquestador principal.
-from orquestador import generar_imagen, generar_locucion, model
+# Se reutilizan la tool de locución y el modelo del orquestador principal.
+from orquestador import generar_locucion, model
 
 logging.getLogger("strands").setLevel(logging.INFO)
 logging.basicConfig(format="%(levelname)s | %(name)s | %(message)s")
@@ -45,7 +47,8 @@ def escribir_guion(brief: str) -> str:
             "guion para un anuncio vertical 9:16 de 15 segundos, dividido en 3 "
             "escenas de 5 segundos cada una. Para cada escena devuelve un objeto "
             "JSON con dos claves: 'prompt_imagen', un prompt en inglés, estilo "
-            "cinematográfico, para generar el fotograma de esa escena; y "
+            "cinematográfico, que describa una composición vertical (sujeto "
+            "centrado, formato retrato) para generar el fotograma de esa escena; y "
             "'texto_locucion', el texto de la locución en español con un máximo "
             "de 12 palabras. Responde únicamente con un objeto JSON válido con "
             "la clave 'escenas' que contenga un array de 3 objetos. No incluyas "
@@ -116,6 +119,51 @@ def _guion_falso() -> dict:
 
 
 @tool
+def generar_imagen_vertical(prompt: str) -> str:
+    """Genera una imagen vertical 9:16 a partir de un prompt y devuelve su ruta S3.
+    El prompt debe escribirse en inglés: el filtro de Stability rechaza prompts en otros idiomas.
+    Real: Bedrock invoke_model con stability.stable-image-ultra-v1:1 (us-west-2).
+    Si Bedrock devuelve ThrottlingException, espera 10 s y reintenta una vez antes del fallback."""
+    for intento in range(2):  # 1 intento + 1 reintento por throttling
+        try:
+            # 1) Generar imagen vertical con Bedrock (Stability Ultra, us-west-2)
+            bedrock = boto3.client("bedrock-runtime", region_name="us-west-2")
+            cuerpo = json.dumps(
+                {"prompt": prompt, "aspect_ratio": "9:16", "output_format": "png"}
+            )
+            respuesta = bedrock.invoke_model(
+                modelId="stability.stable-image-ultra-v1:1",
+                body=cuerpo,
+            )
+            resultado = json.loads(respuesta["body"].read())
+            if "images" not in resultado or not resultado["images"]:
+                return f"[FALLBACK] s3://demo-bucket/vertical.png - {resultado.get('finish_reasons')}"
+            imagen_b64 = resultado["images"][0]
+            imagen_bytes = base64.b64decode(imagen_b64)
+
+            # 2) Subir a S3 (eu-north-1)
+            s3 = boto3.client("s3", region_name="eu-north-1")
+            timestamp = time.strftime("%Y%m%d_%H%M%S")
+            bucket = "karem-hackathon-278175638522"
+            key = f"generadas/vertical_{timestamp}.png"
+            s3.put_object(
+                Bucket=bucket, Key=key, Body=imagen_bytes, ContentType="image/png"
+            )
+            return f"s3://{bucket}/{key}"
+        except ClientError as e:
+            # ThrottlingException: esperar 10 s y reintentar una sola vez
+            if e.response["Error"]["Code"] == "ThrottlingException" and intento == 0:
+                logging.getLogger(__name__).warning(
+                    "generar_imagen_vertical: ThrottlingException, reintento en 10 s"
+                )
+                time.sleep(10)
+                continue
+            return f"[FALLBACK] s3://demo-bucket/vertical.png - {e}"
+        except Exception as e:
+            return f"[FALLBACK] s3://demo-bucket/vertical.png - {e}"
+
+
+@tool
 def generar_video_ray2(prompt: str) -> str:
     """Genera un clip de vídeo a partir de un prompt y devuelve su ruta S3.
 
@@ -145,9 +193,17 @@ def montar_anuncio(imagenes_s3: list[str], textos: list[str]) -> str:
         s3 = boto3.client("s3", region_name="eu-north-1")
         bucket = "karem-hackathon-278175638522"
 
-        # 1) Descargar cada imagen a un archivo temporal
+        # 1) Filtrar imágenes válidas (descartar fallbacks y rutas de demo)
+        imagenes_validas = [
+            u for u in imagenes_s3
+            if not u.startswith("[FALLBACK]") and "demo-bucket" not in u
+        ]
+        if not imagenes_validas:
+            return "[FALLBACK] s3://demo-bucket/anuncio.mp4 - sin imágenes válidas"
+
+        # 2) Descargar cada imagen válida a un archivo temporal
         imagenes_loc = []
-        for uri in imagenes_s3:
+        for uri in imagenes_validas:
             parsed = urlparse(uri)
             bucket_origen = parsed.netloc
             key = parsed.path.lstrip("/")
@@ -158,7 +214,7 @@ def montar_anuncio(imagenes_s3: list[str], textos: list[str]) -> str:
                 imagenes_loc.append(tmp.name)
                 temporales.append(tmp.name)
 
-        # 2) Clip de 5 s con zoompan por cada imagen (125 frames a 25 fps)
+        # 3) Clip de 5 s con zoompan por cada imagen (125 frames a 25 fps)
         clips = []
         for img_path in imagenes_loc:
             clip_fd, clip_path = tempfile.mkstemp(suffix=".mp4")
@@ -171,12 +227,7 @@ def montar_anuncio(imagenes_s3: list[str], textos: list[str]) -> str:
                     "-loop", "1",
                     "-i", img_path,
                     "-vf",
-                    (
-                        "scale=2160:3840:force_original_aspect_ratio=increase,"
-                        "crop=2160:3840,"
-                        "zoompan=z='min(zoom+0.0015,1.5)':d=125:s=1080x1920:fps=25,"
-                        "format=yuv420p"
-                    ),
+                    "scale=4320:7680:force_original_aspect_ratio=increase,crop=4320:7680,zoompan=z='1+0.08*on/125':d=125:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps=25,format=yuv420p",
                     "-frames:v", "125",
                     "-an",
                     clip_path,
@@ -185,7 +236,7 @@ def montar_anuncio(imagenes_s3: list[str], textos: list[str]) -> str:
                 capture_output=True,
             )
 
-        # 3) Concatenar los clips en un único vídeo vertical sin audio
+        # 4) Concatenar los clips en un único vídeo vertical sin audio
         salida_fd, salida_tmp = tempfile.mkstemp(suffix=".mp4")
         os.close(salida_fd)
         temporales.append(salida_tmp)
@@ -209,7 +260,7 @@ def montar_anuncio(imagenes_s3: list[str], textos: list[str]) -> str:
             capture_output=True,
         )
 
-        # 4) Subir el resultado a S3
+        # 5) Subir el resultado a S3
         timestamp = time.strftime("%Y%m%d_%H%M%S")
         key_destino = f"anuncios/anuncio_{timestamp}.mp4"
         s3.upload_file(salida_tmp, bucket, key_destino)
@@ -232,13 +283,14 @@ def montar_anuncio(imagenes_s3: list[str], textos: list[str]) -> str:
 
 agente_anuncio = Agent(
     model=model,
-    tools=[escribir_guion, generar_imagen, generar_video_ray2, montar_anuncio, generar_locucion],
+    tools=[escribir_guion, generar_imagen_vertical, generar_video_ray2, montar_anuncio, generar_locucion],
     system_prompt=(
         "Eres el agente de creación de anuncios publicitarios a partir de un brief. "
         "Recibes un brief de marketing. Sigue este orden: "
         "1) llama a escribir_guion con el brief para obtener un guion en JSON con 3 escenas, "
         "cada una con 'prompt_imagen' (en inglés) y 'texto_locucion' (en español); "
-        "2) para cada escena, llama a generar_imagen pasando su 'prompt_imagen' en inglés; "
+        "2) para cada escena, llama a generar_imagen_vertical pasando su 'prompt_imagen' en inglés; "
+        "no hace falta esperar entre cada llamada, y si alguna devuelve [FALLBACK] continúa con las demás; "
         "guarda cada ruta S3 devuelta en una lista, en el mismo orden que las escenas; "
         "3) llama a montar_anuncio pasando la lista de rutas S3 de las imágenes y la lista "
         "de textos de locución en el mismo orden; "
