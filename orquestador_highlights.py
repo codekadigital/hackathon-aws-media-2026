@@ -51,9 +51,15 @@ def entender_video(s3_uri: str) -> str:
                         },
                         {
                             "text": (
-                                "Lista los 3 momentos más destacados del vídeo "
-                                "con inicio y fin en formato HH:MM:SS y un título "
-                                "corto. Responde solo con JSON"
+                                "Eres editor de redes de un club de fútbol. "
+                                "Busca momentos con potencial viral: goles, paradas, "
+                                "regates, celebraciones, polémicas, reacciones del "
+                                "público o del banquillo, momentos graciosos. "
+                                "Para cada uno da inicio y fin en HH:MM:SS (entre 5 "
+                                "y 20 segundos), un título corto y una puntuación de "
+                                "1 a 10 según emoción, sorpresa y claridad visual. "
+                                "Devuelve solo JSON con los momentos que pasen de 7, "
+                                "ordenados de mayor a menor puntuación."
                             )
                         },
                     ],
