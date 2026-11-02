@@ -10,8 +10,12 @@ Ejecutar (necesita credenciales AWS con acceso a Bedrock):
 import base64
 import json
 import logging
+import os
+import subprocess
+import tempfile
 import time
 import boto3
+from urllib.parse import urlparse
 from strands import Agent, tool
 from strands.models.bedrock import BedrockModel
 
@@ -93,7 +97,58 @@ def generar_imagen(prompt: str) -> str:
 def cortar_clip(s3_uri: str, inicio: str, fin: str) -> str:
     """Recorta un fragmento del vídeo entre los instantes inicio y fin (formato HH:MM:SS) y devuelve la ruta S3 del clip recortado.
     Real: ffmpeg con selección de tramos por marcas de tiempo (-ss / -to)."""
-    return f"s3://demo-bucket/clip_{inicio}_{fin}.mp4"
+    entrada_tmp = None
+    salida_tmp = None
+    try:
+        # Descargar el objeto de S3 a un archivo temporal
+        parsed = urlparse(s3_uri)
+        bucket_origen = parsed.netloc
+        key_origen = parsed.path.lstrip("/")
+        s3 = boto3.client("s3", region_name="eu-north-1")
+        with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp_in:
+            s3.download_fileobj(bucket_origen, key_origen, tmp_in)
+            entrada_tmp = tmp_in.name
+
+        # Archivo de salida temporal
+        salida_fd, salida_tmp = tempfile.mkstemp(suffix=".mp4")
+        os.close(salida_fd)
+
+        # Recortar el clip en vertical 9:16 (1080x1920) con ffmpeg
+        subprocess.run(
+            [
+                "ffmpeg", "-y",
+                "-ss", inicio, "-to", fin,
+                "-i", entrada_tmp,
+                "-vf", "crop=ih*9/16:ih,scale=1080:1920",
+                "-c:v", "libx264", "-preset", "veryfast",
+                "-c:a", "aac",
+                salida_tmp,
+            ],
+            check=True,
+            capture_output=True,
+        )
+
+        # Subir el clip al bucket de destino
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        inicio_safe = inicio.replace(":", "-")
+        fin_safe = fin.replace(":", "-")
+        bucket_destino = "karem-hackathon-278175638522"
+        key_destino = f"clips/clip_{inicio_safe}_{fin_safe}_{timestamp}.mp4"
+        s3.upload_file(salida_tmp, bucket_destino, key_destino)
+
+        return f"s3://{bucket_destino}/{key_destino}"
+    except subprocess.CalledProcessError as e:
+        stderr = e.stderr.decode("utf-8", errors="replace") if e.stderr else ""
+        return f"[FALLBACK] s3://demo-bucket/clip_{inicio}_{fin}.mp4 - {e} {stderr}"
+    except Exception as e:
+        return f"[FALLBACK] s3://demo-bucket/clip_{inicio}_{fin}.mp4 - {e}"
+    finally:
+        for ruta in (entrada_tmp, salida_tmp):
+            if ruta and os.path.exists(ruta):
+                try:
+                    os.remove(ruta)
+                except OSError:
+                    pass
 
 # ---------- ORQUESTADOR ----------
 
