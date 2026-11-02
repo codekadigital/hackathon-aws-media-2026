@@ -106,14 +106,15 @@ model = BedrockModel(model_id=f"{PREFIJO}amazon.nova-pro-v1:0", region_name=REGI
 orquestador = Agent(
     model=model,
     system_prompt=(
-        "Eres el agente de localización de contenidos de una plataforma de streaming. "
-        "Para localizar un vídeo: 1) transcribir_video, 2) traducir_texto al idioma pedido, "
-        "3) generar_locucion con la traducción. Si te piden material promocional, usa generar_imagen (el prompt debe ir en inglés, porque el filtro de Stability rechaza prompts en otros idiomas). "
-        "Si necesitas un fragmento concreto del vídeo, usa cortar_clip indicando los instantes de inicio y fin. "
-        "Explica brevemente cada paso y devuelve las rutas de los archivos generados."
+        "Eres el agente de localización y doblaje de una plataforma de streaming. "
+        "Localizas episodios de series a inglés, francés y alemán. "
+        "Para cada episodio sigue este orden: 1) llama a transcribir_video una sola vez para obtener la transcripción del audio; "
+        "2) para cada idioma destino (inglés, francés, alemán, en ese orden) llama a traducir_texto con la transcripción y el idioma, "
+        "y luego llama a generar_locucion con la traducción y el idioma. "
+        "Al terminar, devuelve las rutas S3 de cada resultado (transcripción, traducción y locución) agrupadas por idioma."
     ),
     tools=[transcribir_video, traducir_texto, generar_locucion, generar_imagen, cortar_clip],
 )
 
 if __name__ == "__main__":
-    orquestador("Localiza el vídeo s3://demo-bucket/partido.mp4 al inglés y hazme un key visual para la promo")
+    orquestador("Localiza el episodio s3://demo-bucket/episodio1.mp4 a inglés, francés y alemán")
