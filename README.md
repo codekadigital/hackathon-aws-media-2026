@@ -8,6 +8,7 @@ Kit de preparación y esqueleto de agente (Strands + Bedrock) para el hackathon 
 | `tools.py` | Las tools compartidas (transcribir, traducir, locutar, imagen, cortar clip) y el modelo. No se ejecuta solo. |
 | `caso1_anuncio.py` + `probar_caso1.py` | Caso 1: anuncio desde un brief (guion con Nova, imágenes verticales con Stability, montaje con ffmpeg, Ray2 placeholder). |
 | `caso2_highlights.py` + `probar_caso2.py` | Caso 2: highlights para redes (Nova 2 Lite entiende el vídeo, ffmpeg corta en 9:16). |
+| `caso4_descubrimiento.py` + `probar_caso4.py` + `datos/` | Caso 4: descubrimiento conversacional (perfil del espectador + agente especialista de catálogo como tool; catálogo y audiencia de ejemplo en `datos/`). |
 | `caso3_localizacion.py` + `probar_caso3.py` | Caso 3: localización y doblaje a EN/FR/DE (traducción real con Nova; Transcribe y Polly en fallback hasta el evento). |
 | `requirements.txt` | strands-agents, strands-agents-tools, boto3, requests. |
 | `GUIA-HACKATHON.md` | Guía larga: modelos de Bedrock, ComfyUI, Transcribe/Translate/Polly, patrones multiagente, pitch. |

@@ -1,0 +1,47 @@
+[
+  {
+    "id": "u-1001",
+    "edad": 34,
+    "generos_favoritos": ["comedia", "romance", "aventura"],
+    "ultimos_vistos": ["t-009", "t-003", "t-014"],
+    "horario_habitual": "noche",
+    "dispositivo": "smart TV",
+    "idioma": "es"
+  },
+  {
+    "id": "u-1002",
+    "edad": 22,
+    "generos_favoritos": ["ciencia ficción", "thriller", "fantasía"],
+    "ultimos_vistos": ["t-004", "t-011", "t-015"],
+    "horario_habitual": "madrugada",
+    "dispositivo": "móvil",
+    "idioma": "es"
+  },
+  {
+    "id": "u-1003",
+    "edad": 45,
+    "generos_favoritos": ["naturaleza", "gastronomía", "biografía"],
+    "ultimos_vistos": ["t-005", "t-010", "t-016"],
+    "horario_habitual": "tarde",
+    "dispositivo": "tablet",
+    "idioma": "es"
+  },
+  {
+    "id": "u-1004",
+    "edad": 28,
+    "generos_favoritos": ["acción", "thriller", "misterio"],
+    "ultimos_vistos": ["t-017", "t-019", "t-008"],
+    "horario_habitual": "noche",
+    "dispositivo": "smart TV",
+    "idioma": "en"
+  },
+  {
+    "id": "u-1005",
+    "edad": 16,
+    "generos_favoritos": ["animación", "fantasía", "aventura"],
+    "ultimos_vistos": ["t-012", "t-015", "t-016"],
+    "horario_habitual": "tarde",
+    "dispositivo": "móvil",
+    "idioma": "es"
+  }
+]

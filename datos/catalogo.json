@@ -1,0 +1,222 @@
+[
+  {
+    "id": "t-001",
+    "titulo": "La casa de Alba",
+    "tipo": "serie",
+    "genero": "drama",
+    "año": 2023,
+    "duracion_min": 45,
+    "sinopsis": "Una familia aristócrata se enfrenta a la ruina en el Madrid del siglo XIX.",
+    "tono": "intenso",
+    "idiomas": ["es", "en", "fr"]
+  },
+  {
+    "id": "t-002",
+    "titulo": "Operación Malva",
+    "tipo": "película",
+    "genero": "comedia",
+    "año": 2024,
+    "duracion_min": 98,
+    "sinopsis": "Dos inspectores novatos deben atrapar a un ladrón de obras de arte en Benidorm.",
+    "tono": "ligero",
+    "idiomas": ["es", "en"]
+  },
+  {
+    "id": "t-003",
+    "titulo": "El último tren a Cádiz",
+    "tipo": "película",
+    "genero": "romance",
+    "año": 2022,
+    "duracion_min": 110,
+    "sinopsis": "Una pianista y un marinero se encuentran fortuitamente en un tren costero.",
+    "tono": "ligero",
+    "idiomas": ["es", "fr", "it"]
+  },
+  {
+    "id": "t-004",
+    "titulo": "Náufragos del tiempo",
+    "tipo": "serie",
+    "genero": "ciencia ficción",
+    "año": 2025,
+    "duracion_min": 50,
+    "sinopsis": "Una tripulación despierta 200 años después para encontrar la Tierra transformada.",
+    "tono": "intenso",
+    "idiomas": ["es", "en", "ja"]
+  },
+  {
+    "id": "t-005",
+    "titulo": "Cocina con alma",
+    "tipo": "documental",
+    "genero": "gastronomía",
+    "año": 2023,
+    "duracion_min": 60,
+    "sinopsis": "Recorre los mercados más antiguos de España junto a chefs locales.",
+    "tono": "familiar",
+    "idiomas": ["es", "en"]
+  },
+  {
+    "id": "t-006",
+    "titulo": "La niebla de Galicia",
+    "tipo": "película",
+    "genero": "terror",
+    "año": 2024,
+    "duracion_min": 95,
+    "sinopsis": "Un pueblo costero oculta un secreto bajo la niebla perpetua.",
+    "tono": "intenso",
+    "idiomas": ["es", "en"]
+  },
+  {
+    "id": "t-007",
+    "titulo": "Fútbol corazones",
+    "tipo": "serie",
+    "genero": "deportes",
+    "año": 2025,
+    "duracion_min": 40,
+    "sinopsis": "Un equipo amateur de barrio lucha por subir a la liga regional.",
+    "tono": "familiar",
+    "idiomas": ["es", "en", "pt"]
+  },
+  {
+    "id": "t-008",
+    "titulo": "El relojero de Toledo",
+    "tipo": "película",
+    "genero": "misterio",
+    "año": 2023,
+    "duracion_min": 105,
+    "sinopsis": "Un anciano relojero recibe un encargo que puede cambiar el destino de la ciudad.",
+    "tono": "intenso",
+    "idiomas": ["es", "en", "de"]
+  },
+  {
+    "id": "t-009",
+    "titulo": "Verano en Ibiza",
+    "tipo": "serie",
+    "genero": "comedia romántica",
+    "año": 2024,
+    "duracion_min": 35,
+    "sinopsis": "Cinco amigos alquilan una casa en Ibiza y nada sale como esperaban.",
+    "tono": "ligero",
+    "idiomas": ["es", "en", "de"]
+  },
+  {
+    "id": "t-010",
+    "titulo": "La selva prohibida",
+    "tipo": "documental",
+    "genero": "naturaleza",
+    "año": 2022,
+    "duracion_min": 55,
+    "sinopsis": "Un equipo de biólogos documenta especies amenazadas en el corazón del Amazonas.",
+    "tono": "familiar",
+    "idiomas": ["es", "en", "pt"]
+  },
+  {
+    "id": "t-011",
+    "titulo": "Código rojo Madrid",
+    "tipo": "serie",
+    "genero": "thriller",
+    "año": 2025,
+    "duracion_min": 48,
+    "sinopsis": "Una inspectora de policía persigue a un hacker que sabotea hospitales.",
+    "tono": "intenso",
+    "idiomas": ["es", "en", "fr"]
+  },
+  {
+    "id": "t-012",
+    "titulo": "El pequeño inventor",
+    "tipo": "película",
+    "genero": "animación",
+    "año": 2023,
+    "duracion_min": 92,
+    "sinopsis": "Una niña construye una máquina que viaja dentro de los sueños.",
+    "tono": "familiar",
+    "idiomas": ["es", "en", "ja"]
+  },
+  {
+    "id": "t-013",
+    "titulo": "Reinas del ring",
+    "tipo": "película",
+    "genero": "biografía",
+    "año": 2024,
+    "duracion_min": 108,
+    "sinopsis": "La historia real de las primeras luchadoras españolas en los años 70.",
+    "tono": "intenso",
+    "idiomas": ["es", "en"]
+  },
+  {
+    "id": "t-014",
+    "titulo": "Brindis en París",
+    "tipo": "película",
+    "genero": "comedia",
+    "año": 2022,
+    "duracion_min": 100,
+    "sinopsis": "Tres camareros españoles abren un bar de tapas frente a la Torre Eiffel.",
+    "tono": "ligero",
+    "idiomas": ["es", "fr", "en"]
+  },
+  {
+    "id": "t-015",
+    "titulo": "La herencia maldita",
+    "tipo": "serie",
+    "genero": "fantasía",
+    "año": 2025,
+    "duracion_min": 52,
+    "sinopsis": "Cuatro hermanos descubren poderes ocultos tras la muerte de su abuela bruja.",
+    "tono": "intenso",
+    "idiomas": ["es", "en", "it"]
+  },
+  {
+    "id": "t-016",
+    "titulo": "Rutas salvajes",
+    "tipo": "documental",
+    "genero": "aventura",
+    "año": 2023,
+    "duracion_min": 58,
+    "sinopsis": "Recorre los senderos más espectaculares de la península ibérica.",
+    "tono": "familiar",
+    "idiomas": ["es", "en"]
+  },
+  {
+    "id": "t-017",
+    "titulo": "Duelo en Sevilla",
+    "tipo": "película",
+    "genero": "acción",
+    "año": 2024,
+    "duracion_min": 112,
+    "sinopsis": "Un guardaespaldas debe proteger a una testigo durante la Feria de Abril.",
+    "tono": "intenso",
+    "idiomas": ["es", "en", "it"]
+  },
+  {
+    "id": "t-018",
+    "titulo": "Café con lejanía",
+    "tipo": "serie",
+    "genero": "drama",
+    "año": 2022,
+    "duracion_min": 42,
+    "sinopsis": "Una camarera de un café de barrio conoce a un escritor en crisis.",
+    "tono": "ligero",
+    "idiomas": ["es", "en"]
+  },
+  {
+    "id": "t-019",
+    "titulo": "Bajo el volcán",
+    "tipo": "película",
+    "genero": "thriller",
+    "año": 2025,
+    "duracion_min": 107,
+    "sinopsis": "Un volcanólogo descubre una conspiración en una isla canaria.",
+    "tono": "intenso",
+    "idiomas": ["es", "en", "fr"]
+  },
+  {
+    "id": "t-020",
+    "titulo": "Flamenco para siempre",
+    "tipo": "documental",
+    "genero": "música",
+    "año": 2023,
+    "duracion_min": 70,
+    "sinopsis": "Las nuevas generaciones reinventan el flamenco entre tradición y trap.",
+    "tono": "familiar",
+    "idiomas": ["es", "en", "ja"]
+  }
+]
