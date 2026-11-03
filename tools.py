@@ -1,11 +1,8 @@
 """
-Esqueleto del agente orquestador para el hackathon (4 nov 2026).
-Patrón: igual que el lab A2 Strands, pero con tools "falsas" que devuelven texto fijo.
-El día 4 se sustituye cada tool por la llamada real (boto3 / ComfyUI) una a una.
-
-Ejecutar (necesita credenciales AWS con acceso a Bedrock):
-    source .venv/bin/activate
-    python hackathon/orquestador.py
+TOOLS COMPARTIDAS + modelo. Las importan los tres casos (caso1_anuncio.py, caso2_highlights.py, caso3_localizacion.py).
+Patrón: igual que el lab A2 Strands. Las tools "falsas" devuelven texto fijo; cada una se sustituye
+por la llamada real (boto3 / ffmpeg) cambiando solo el cuerpo, no la firma ni el docstring.
+Este archivo no se ejecuta solo: no tiene Agent.
 """
 import base64
 import json
@@ -150,26 +147,10 @@ def cortar_clip(s3_uri: str, inicio: str, fin: str) -> str:
                 except OSError:
                     pass
 
-# ---------- ORQUESTADOR ----------
+# ---------- MODELO (compartido) ----------
 
 # Región y modelo: en el evento será us-east-1 (perfil "us."). En la cuenta personal
 # (plan gratuito) la región casa es eu-north-1 y Nova se usa con el perfil "eu.".
 REGION = boto3.Session().region_name or "us-east-1"   # la de `aws configure` o AWS_REGION
 PREFIJO = "eu." if REGION.startswith("eu-") else "us."
 model = BedrockModel(model_id=f"{PREFIJO}amazon.nova-pro-v1:0", region_name=REGION)
-
-orquestador = Agent(
-    model=model,
-    system_prompt=(
-        "Eres el agente de localización y doblaje de una plataforma de streaming. "
-        "Localizas episodios de series a inglés, francés y alemán. "
-        "Para cada episodio sigue este orden: 1) llama a transcribir_video una sola vez para obtener la transcripción del audio; "
-        "2) para cada idioma destino (inglés, francés, alemán, en ese orden) llama a traducir_texto con la transcripción y el idioma, "
-        "y luego llama a generar_locucion con la traducción y el idioma. "
-        "Al terminar, devuelve las rutas S3 de cada resultado (transcripción, traducción y locución) agrupadas por idioma."
-    ),
-    tools=[transcribir_video, traducir_texto, generar_locucion, generar_imagen, cortar_clip],
-)
-
-if __name__ == "__main__":
-    orquestador("Localiza el episodio s3://demo-bucket/episodio1.mp4 a inglés, francés y alemán")

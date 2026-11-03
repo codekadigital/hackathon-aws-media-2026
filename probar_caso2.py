@@ -1,6 +1,6 @@
 """Prueba las tools del agente de highlights directamente, SIN modelo ni agente (como probar_tools.py)."""
-from orquestador_highlights import entender_video
-from orquestador import cortar_clip
+from caso2_highlights import entender_video
+from tools import cortar_clip
 
 # entender_video: llama a Bedrock Nova Lite con el vídeo de S3.
 print(entender_video("s3://karem-hackathon-278175638522/entrada/prueba12s.mp4"))

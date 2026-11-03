@@ -8,7 +8,7 @@ escena, monta un vídeo vertical 9:16 con ffmpeg y genera la locución.
 
 Ejecutar (necesita credenciales AWS con acceso a Bedrock + ffmpeg instalado):
     source .venv/bin/activate
-    python hackathon/orquestador_anuncio.py
+    python hackathon/caso1_anuncio.py
 """
 import base64
 import json
@@ -23,7 +23,7 @@ from botocore.exceptions import ClientError
 from strands import Agent, tool
 
 # Se reutilizan la tool de locución y el modelo del orquestador principal.
-from orquestador import generar_locucion, model
+from tools import generar_locucion, model
 
 logging.getLogger("strands").setLevel(logging.INFO)
 logging.basicConfig(format="%(levelname)s | %(name)s | %(message)s")

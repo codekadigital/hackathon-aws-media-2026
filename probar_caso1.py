@@ -6,7 +6,7 @@
   (lista las keys con boto3 y coge las dos primeras) y textos de ejemplo.
 """
 import boto3
-from orquestador_anuncio import escribir_guion, montar_anuncio
+from caso1_anuncio import escribir_guion, montar_anuncio
 
 # Brief del encargo.
 brief = (

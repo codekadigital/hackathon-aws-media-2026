@@ -8,7 +8,7 @@ uno con cortar_clip y, si hace falta, genera una miniatura con generar_imagen.
 
 Ejecutar (necesita credenciales AWS con acceso a Bedrock):
     source .venv/bin/activate
-    python hackathon/orquestador_highlights.py
+    python hackathon/caso2_highlights.py
 """
 import json
 import logging
@@ -16,7 +16,7 @@ import boto3
 from strands import Agent, tool
 
 # Se reutilizan tools y modelo del orquestador principal.
-from orquestador import cortar_clip, generar_imagen, model
+from tools import cortar_clip, generar_imagen, model
 
 logging.getLogger("strands").setLevel(logging.INFO)
 logging.basicConfig(format="%(levelname)s | %(name)s | %(message)s")

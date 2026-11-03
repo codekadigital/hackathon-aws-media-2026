@@ -2,15 +2,18 @@
 
 Kit de preparación y esqueleto de agente (Strands + Bedrock) para el hackathon de Madrid (Torre Foster, 09:00–18:30).
 
-## Qué hay aquí
+## Qué hay aquí (un archivo por caso de uso)
 | Archivo | Para qué |
 |---|---|
-| `orquestador.py` | Agente orquestador Strands con 5 tools placeholder (transcribir, traducir, locutar, imagen, cortar clip). Se sustituyen una a una por las reales el día del evento. |
-| `probar_tools.py` | Prueba las tools sin modelo ni credenciales. Debe imprimir 5 líneas. |
+| `tools.py` | Las tools compartidas (transcribir, traducir, locutar, imagen, cortar clip) y el modelo. No se ejecuta solo. |
+| `caso1_anuncio.py` + `probar_caso1.py` | Caso 1: anuncio desde un brief (guion con Nova, imágenes verticales con Stability, montaje con ffmpeg, Ray2 placeholder). |
+| `caso2_highlights.py` + `probar_caso2.py` | Caso 2: highlights para redes (Nova 2 Lite entiende el vídeo, ffmpeg corta en 9:16). |
+| `caso3_localizacion.py` + `probar_caso3.py` | Caso 3: localización y doblaje a EN/FR/DE (traducción real con Nova; Transcribe y Polly en fallback hasta el evento). |
 | `requirements.txt` | strands-agents, strands-agents-tools, boto3, requests. |
-| `GUIA-HACKATHON.md` | Guía larga: modelos de Bedrock (Ray2, Stability, Pegasus), ComfyUI, Transcribe/Translate/Polly, patrones multiagente, pitch. |
+| `GUIA-HACKATHON.md` | Guía larga: modelos de Bedrock, ComfyUI, Transcribe/Translate/Polly, patrones multiagente, pitch. |
 | `LEEME-ORDENADOR-TRABAJO.md` | Pasos de instalación en un portátil nuevo. |
-| (chuleta) | Guía móvil privada en claude.ai, con datos de la cuenta; no se sube al repo. |
+
+Cada `probar_casoN.py` llama a las tools de ese caso una a una, sin modelo: primero las piezas, luego el agente (`python casoN_*.py`).
 
 ## Arranque en 2 minutos (Windows, PowerShell)
 ```powershell
@@ -19,7 +22,7 @@ py -V:3.12 -m venv .venv
 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned   # solo la primera vez
 .venv\Scripts\activate
 pip install -r requirements.txt
-python probar_tools.py               # 5 líneas = OK
+python probar_caso3.py               # 5 líneas = OK
 ```
 Linux/Mac: `python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`.
 
